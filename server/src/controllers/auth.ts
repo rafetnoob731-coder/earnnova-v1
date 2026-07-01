@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 import { nanoid } from "nanoid";
 import { User } from "../models/User.js";
 import { config } from "../config/index.js";
@@ -34,9 +34,11 @@ export const register = async (req: Request, res: Response) => {
       }
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, config.jwtSecret, {
-      expiresIn: config.jwtExpiry,
-    });
+    const token = jwt.sign(
+      { id: user._id.toString(), role: user.role },
+      config.jwtSecret,
+      { expiresIn: config.jwtExpiry } as SignOptions
+    );
 
     res.status(201).json({
       token,
@@ -66,9 +68,11 @@ export const login = async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(400).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, config.jwtSecret, {
-      expiresIn: config.jwtExpiry,
-    });
+    const token = jwt.sign(
+      { id: user._id.toString(), role: user.role },
+      config.jwtSecret,
+      { expiresIn: config.jwtExpiry } as SignOptions
+    );
 
     res.json({
       token,
